@@ -14,8 +14,8 @@ description: "Task list for integration implementation"
 **Purpose**: Project initialization and basic structure
 
 - [ ] T001 Create project structure per implementation plan
-- [ ] T002 Initialize `pom.xml` with Spring Boot 3.5.11, Apache Camel 4.14.5, and required starter dependencies (`servlet`, `http`, `jackson`, `test-spring-junit5`)
-- [ ] T003 [P] Configure `application.yml` and typed `@ConfigurationProperties` for external URLs and context path
+- [ ] T002 Initialize `pom.xml` with Spring Boot 3.5.11, Apache Camel 4.14.5, and required dependencies (`servlet`, `http`, `jackson`, `test-spring-junit5`, `resilience4j`)
+- [ ] T003 [P] Configure `application.yml` and typed `@ConfigurationProperties` for external URLs, context path, and Resilience4j settings
 
 ---
 
@@ -48,11 +48,11 @@ description: "Task list for integration implementation"
 
 - [ ] T007 [P] [Flow1] Define Source Product and Target Base Price Java records in `src/main/java/com/example/mapping/`
 - [ ] T008 [P] [Flow1] Define ProblemDetail Java record for error representation in `src/main/java/com/example/mapping/ProblemDetail.java`
-- [ ] T009 [Flow1] Define REST DSL endpoint `GET /v1/products/{productId}/base-price` in `src/main/java/com/example/api/BasePriceApi.java`
+- [ ] T009 [Flow1] Define REST DSL endpoint `GET /v1/products/{productId}/base-price` with positive integer validation for `productId` (FR-002) in `src/main/java/com/example/api/BasePriceApi.java`
 - [ ] T010 [Flow1] Implement data mapping processor from FakeStore to BasePrice in `src/main/java/com/example/mapping/BasePriceMapper.java`
-- [ ] T011 [Flow1] Implement main Camel route orchestrating FakeStoreAPI call in `src/main/java/com/example/routes/BasePriceRoute.java`
+- [ ] T011 [Flow1] Implement main Camel route orchestrating FakeStoreAPI call using Resilience4j circuit breaker in `src/main/java/com/example/routes/BasePriceRoute.java`
 - [ ] T012 [Flow1] Add ingress and egress header sanitization (strip `Accept-Encoding`, `Content-Encoding`, `Server`) in `src/main/java/com/example/routes/BasePriceRoute.java`
-- [ ] T013 [Flow1] Implement specific error handling (404, 504) with explicit `.throwException()` and status assignments in `src/main/java/com/example/routes/BasePriceRoute.java`
+- [ ] T013 [Flow1] Implement specific error handling (404, 504, 502 Bad Gateway) with explicit `.throwException()` and status assignments in `src/main/java/com/example/routes/BasePriceRoute.java`
 
 **Checkpoint**: At this point, Flow 1 should be fully functional and testable independently
 
@@ -66,6 +66,7 @@ description: "Task list for integration implementation"
 - [ ] T015 Verify timeout and connection configurations on all Camel components (`connectionTimeout`, `socketTimeout`)
 - [ ] T016 Audit all boundaries for missing header sanitization
 - [ ] T017 Verify all tests use "Advice Once" and don't trigger context recreation
+- [ ] T018 Conduct load/performance testing to verify 5 TPS throughput and < 50ms processing overhead (SC-003, SC-004)
 
 ---
 

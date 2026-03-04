@@ -11,19 +11,19 @@ Retrieve and format product base prices from FakeStoreAPI. The integration expos
 **Language/Version**: Java 17
 **Spring Boot Version**: 3.5.11
 **Apache Camel Version**: 4.14.5
-**Other Dependencies**: `camel-servlet-starter`, `camel-http-starter`, `camel-jackson-starter`, `camel-test-spring-junit5`
+**Other Dependencies**: `camel-servlet-starter`, `camel-http-starter`, `camel-jackson-starter`, `camel-test-spring-junit5`, `camel-resilience4j`
 **Transport**: HTTPS (JSON over HTTP)
 **Testing**: JUnit 5, MockEndpoint (Advice Once pattern)
 **Integration Type**: Synchronous API
 **Performance Goals**: 5 TPS sustained, < 50ms internal overhead
-**Constraints**: RFC 9457 (Problem Details) error handling, No caching
+**Constraints**: RFC 9457 (Problem Details) error handling, No caching, Resilience4j Circuit Breaker required for FakeStoreAPI
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - [x] **Contract-Driven**: OpenAPI specs for sender and receiver are defined in `specs/001-base-price-retrieval/contracts/`.
-- [x] **Failure Design**: Timeouts and error propagation are planned using `onException` and `ProblemDetail`.
+- [x] **Failure Design**: Timeouts, retries, and Resilience4j circuit breakers are planned using `onException` and `ProblemDetail`.
 - [x] **Dynamic Safety**: Error handling will use `.throwException(Class, String)` to support Simple expressions.
 - [x] **Header Sanitization**: `Accept-Encoding` and other ingress/egress headers will be stripped at boundaries.
 - [x] **Testing Strategy**: The test plan follows the "Advice Once" pattern to avoid `@DirtiesContext`.
@@ -65,4 +65,4 @@ src/test/java/com/example/
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 | --- | --- | --- |
-| None | N/A | N/A |
+| Missing DLQ for failed retries (Principle V) | This is a synchronous HTTP integration serving frontend clients. A DLQ is asynchronous and breaks the synchronous request/response cycle expected by the caller. | We reject a DLQ here because the calling system (E-commerce platform) needs an immediate failure response (e.g., 502/504) to handle the error in its own UI, rather than having the request silently queued for manual review. |
