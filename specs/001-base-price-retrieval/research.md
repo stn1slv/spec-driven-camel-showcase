@@ -5,10 +5,10 @@
 - **Rationale**: Requested by the user and aligns with the project's development guidelines.
 - **Alternatives considered**: None (user-specified).
 
-## Decision: API Exposure via Camel REST DSL (Servlet Component)
-- **Decision**: Use Camel REST DSL with the `servlet` component.
-- **Rationale**: The Constitution (Architecture Standards) explicitly requires `camel-servlet-starter` for REST APIs. It provides a standardized integration path within Spring Boot.
-- **Alternatives considered**: Spring `@RestController`. Rejected to maintain integration logic entirely within Camel's domain.
+## Decision: Declarative Mapping via JSONata
+- **Decision**: Use `camel-jsonata` for data transformation.
+- **Rationale**: Mandated by project guidelines for JSON-to-JSON transformations to reduce imperative Java boilerplate. Bypasses intermediate POJO mapping.
+- **Alternatives considered**: Java `Processor` (BasePriceMapper). Rejected in favor of declarative mapping.
 
 ## Decision: Error Handling (RFC 9457)
 - **Decision**: Implement a global `onException` handler that maps `HttpOperationFailedException` and other errors to a `ProblemDetail` object (standard in Spring Boot 3+ / RFC 9457).

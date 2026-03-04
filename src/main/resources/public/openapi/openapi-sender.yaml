@@ -1,0 +1,77 @@
+openapi: 3.0.0
+info:
+  title: Base Price Retrieval API
+  version: 1.0.0
+  description: Exposed by the Integration Layer to retrieve product base prices.
+paths:
+  /v1/products/{productId}/base-price:
+    get:
+      summary: Retrieve the base price of a product in USD
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: Numeric product identifier
+      responses:
+        '200':
+          description: Base price retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  productId:
+                    type: integer
+                    example: 1
+                  basePrice:
+                    type: number
+                    format: float
+                    example: 109.95
+                  currency:
+                    type: string
+                    example: "USD"
+        '404':
+          description: Product not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '400':
+          description: Invalid product ID
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '502':
+          description: Bad gateway (downstream system error)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '503':
+          description: Service unavailable (circuit breaker open)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+components:
+  schemas:
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri

@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+camel:
+  servlet:
+    mapping:
+      context-path: /*
+  springboot:
+    name: base-price-retrieval
+    main-run-controller: true
+
+app:
+  fakestore:
+    base-url: "https://fakestoreapi.com"
+
+# Resilience4j configurations can also be handled within Camel Route directly or application properties
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+    instances:
+      fakestore:
+        baseConfig: default
