@@ -25,7 +25,11 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] **Contract-Driven**: Is the OpenAPI/AsyncAPI spec defined and linked?
+- [ ] **Failure Design**: Are timeouts, retries, and circuit breakers planned for all external calls?
+- [ ] **Dynamic Safety**: Does error handling use `.throwException(Class, String)` to support Simple expressions?
+- [ ] **Header Sanitization**: Is ingress/egress header stripping planned for all HTTP boundaries?
+- [ ] **Testing Strategy**: Does the test plan follow the "Advice Once" pattern to avoid `@DirtiesContext`?
 
 ## Project Structure
 

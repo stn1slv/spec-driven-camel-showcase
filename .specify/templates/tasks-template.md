@@ -66,7 +66,9 @@ description: "Task list template for integration implementation"
 - [ ] T011 [P] [Flow1] Implement data mapping logic (e.g., MapStruct, Bindy, or custom Processor)
 - [ ] T012 [Flow1] Implement routing logic and downstream calls
 - [ ] T013 [Flow1] Add payload validation steps
-- [ ] T014 [Flow1] Add structured logging within the route
+- [ ] T014 [Flow1] Add header sanitization (strip `Accept-Encoding`, `Content-Encoding`, etc.)
+- [ ] T015 [Flow1] Add structured logging within the route
+- [ ] T016 [Flow1] Implement `onException` blocks with surgical status code assignment
 
 **Checkpoint**: At this point, Flow 1 should be fully functional and testable independently
 
@@ -80,13 +82,14 @@ description: "Task list template for integration implementation"
 
 ### Tests for Flow 2 (OPTIONAL - only if tests requested) ⚠️
 
-- [ ] T015 [P] [Flow2] Camel Route integration test for secondary routing/error handling
+- [ ] T017 [P] [Flow2] Camel Route integration test (Advice Once, no `@DirtiesContext`)
 
 ### Implementation for Flow 2
 
-- [ ] T016 [P] [Flow2] Implement secondary data mapping logic
-- [ ] T017 [Flow2] Integrate secondary downstream connector route
-- [ ] T018 [Flow2] Update main route to handle conditional routing (e.g., Content-Based Router)
+- [ ] T018 [P] [Flow2] Implement secondary data mapping logic
+- [ ] T019 [Flow2] Integrate secondary downstream connector route
+- [ ] T020 [Flow2] Update main route to handle conditional routing (e.g., Content-Based Router)
+- [ ] T021 [Flow2] Sanitize egress headers for secondary system responses
 
 **Checkpoint**: At this point, Flow 1 AND Flow 2 should both work independently
 
@@ -98,6 +101,8 @@ description: "Task list template for integration implementation"
 
 - [ ] TXXX [P] Update API documentation or contract files in docs/
 - [ ] TXXX Verify timeout and connection configurations on all Camel components
+- [ ] TXXX Audit all boundaries for missing header sanitization
+- [ ] TXXX Verify all tests use "Advice Once" and don't trigger context recreation
 - [ ] TXXX Review Dead Letter Channel and error logging outputs for sensitive data leaks
 
 ---
