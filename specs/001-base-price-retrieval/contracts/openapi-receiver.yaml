@@ -1,0 +1,46 @@
+openapi: 3.0.0
+info:
+  title: FakeStoreAPI Product Catalog
+  version: 1.0.0
+  description: Public API for product information.
+paths:
+  /products/{id}:
+    get:
+      summary: Retrieve detailed product information
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Product retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  title:
+                    type: string
+                  price:
+                    type: number
+                    format: float
+                  description:
+                    type: string
+                  category:
+                    type: string
+                  image:
+                    type: string
+                  rating:
+                    type: object
+                    properties:
+                      rate:
+                        type: number
+                      count:
+                        type: integer
+        '404':
+          description: Product not found

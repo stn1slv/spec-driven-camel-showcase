@@ -3,6 +3,7 @@
 Auto-generated from all feature plans. Last updated: 2026-03-03
 
 ## Active Technologies
+- Java 17 (001-base-price-retrieval)
 
 - **Java**: 17+ (LTS)
 - **Spring Boot**: 3.5.11
@@ -52,3 +53,6 @@ Auto-generated from all feature plans. Last updated: 2026-03-03
 **Root Cause:** Overuse of `@DirtiesContext` which forces context recreation. Re-advising a route that has already been started in a shared context can cause conflicts.
 **Prevention Rule:** Avoid `@DirtiesContext`. Use the **"Advice Once"** pattern: manually reset mocks in `@BeforeEach` and only apply `AdviceWith` if the `CamelContext` is not already started. Ensure mocks are reset to maintain isolation while reusing the context.
 
+
+## Recent Changes
+- 001-base-price-retrieval: Added Java 17
