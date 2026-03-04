@@ -28,6 +28,14 @@ E-commerce Platform sends a GET request for a product's base price to the Integr
 - **Invalid ID Format**: How does the system handle non-integer product IDs? (The Integration Layer should return a 400 Bad Request).
 - **Downstream Error**: How does the system handle 500 errors from FakeStoreAPI? (The Integration Layer should propagate the error or return a 502 Bad Gateway).
 
+## Clarifications
+
+### Session 2026-03-04
+- Q: How should the Integration Layer authenticate the E-commerce Platform? → A: None (Handled by external API Gateway)
+- Q: What is the expected peak load (transactions per second)? → A: < 5 TPS (Low load)
+- Q: Should we implement caching in the Integration Layer? → A: No caching (KISS principle)
+- Q: What format should be used for error response bodies (e.g., 404)? → A: Problem Details (RFC 9457)
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
@@ -38,6 +46,8 @@ E-commerce Platform sends a GET request for a product's base price to the Integr
 - **FR-004**: System MUST map `$.id` from FakeStoreAPI response to `$.productId` in the final response.
 - **FR-005**: System MUST map `$.price` from FakeStoreAPI response to `$.basePrice` in the final response.
 - **FR-006**: System MUST hardcode `$.currency` to "USD" in the final response.
+- **FR-007**: System MUST NOT enforce authentication (handled by external API Gateway).
+- **FR-008**: System MUST return error responses following the Problem Details for HTTP APIs standard (RFC 9457).
 
 ### Interface Contract
 
@@ -57,3 +67,4 @@ E-commerce Platform sends a GET request for a product's base price to the Integr
 - **SC-001**: Successful end-to-end retrieval of base price for existing products with 100% mapping accuracy.
 - **SC-002**: Error responses (4xx, 5xx) are correctly propagated or translated according to REST standards.
 - **SC-003**: Integration Layer processing overhead (excluding network time to FakeStoreAPI) is less than 50ms.
+- **SC-004**: System supports a sustained throughput of 5 TPS.
