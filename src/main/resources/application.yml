@@ -10,8 +10,14 @@ camel:
     main-run-controller: true
 
 app:
+  baseprice:
+    base-url: "http://localhost:8080/api"
   fakestore:
     base-url: "https://fakestoreapi.com"
+  exchangerate:
+    base-url: "https://api.exchangerate-api.com"
+  shippo:
+    base-url: "https://api.goshippo.com"
 
 # Resilience4j configurations can also be handled within Camel Route directly or application properties
 resilience4j:
@@ -26,4 +32,10 @@ resilience4j:
         failureRateThreshold: 50
     instances:
       fakestore:
+        baseConfig: default
+      baseprice:
+        baseConfig: default
+      exchangerate:
+        baseConfig: default
+      shippo:
         baseConfig: default

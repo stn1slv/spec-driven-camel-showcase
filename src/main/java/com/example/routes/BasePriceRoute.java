@@ -1,142 +1,75 @@
 package com.example.routes;
 
-import java.net.URI;
-
 import com.example.api.AppConfig;
 import com.example.mapping.ProblemDetail;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.URI;
+import java.util.concurrent.TimeoutException;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.http.base.HttpOperationFailedException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Main Camel route for retrieving base prices from FakeStore API.
+ * Route for retrieving base product prices with local error handling.
  */
 @Component
 public class BasePriceRoute extends RouteBuilder {
 
-    @Autowired
-    private AppConfig appConfig;
+  private final AppConfig appConfig;
 
-    @Override
-    public void configure() throws Exception {
-        
-        onException(HttpOperationFailedException.class)
-                .handled(true)
-                .process(exchange -> {
-                    HttpOperationFailedException cause = exchange.getProperty(
-                            Exchange.EXCEPTION_CAUGHT, HttpOperationFailedException.class);
-                    int statusCode = cause.getStatusCode();
-                    
-                    if (statusCode == 404) {
-                        exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, 404);
-                    } else if (statusCode == 500) {
-                        exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, 502); 
-                        statusCode = 502;
-                    } else if (statusCode == 504) {
-                        exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, 504);
-                    } else {
-                        exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, statusCode);
-                    }
-                    
-                    String uri = exchange.getProperty("originalUri", String.class);
-                    if (uri == null) {
-                        uri = exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
-                    }
-                    
-                    ProblemDetail problem = new ProblemDetail(
-                            URI.create("/problems/downstream-error"),
-                            "Downstream Error",
-                            statusCode,
-                            "Error from downstream system: " + cause.getMessage(),
-                            uri != null ? URI.create(uri) : null
-                    );
-                    
-                    exchange.getMessage().setHeader(Exchange.CONTENT_TYPE, "application/problem+json");
-                    exchange.getMessage().setBody(problem);
-                });
+  public BasePriceRoute(AppConfig appConfig) {
+    this.appConfig = appConfig;
+  }
 
-        onException(IllegalArgumentException.class)
-                .handled(true)
-                .process(exchange -> {
-                    exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, 400);
-                    String uri = exchange.getProperty("originalUri", String.class);
-                    if (uri == null) {
-                        uri = exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
-                    }
-                    
-                    ProblemDetail problem = new ProblemDetail(
-                            URI.create("/problems/bad-request"),
-                            "Bad Request",
-                            400,
-                            exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class).getMessage(),
-                            uri != null ? URI.create(uri) : null
-                    );
-                    exchange.getMessage().setHeader(Exchange.CONTENT_TYPE, "application/problem+json");
-                    exchange.getMessage().setBody(problem);
-                });
+  @Override
+  public void configure() throws Exception {
+    // Local error handling for connectivity issues, taking precedence over global config.
+    onException(SocketTimeoutException.class, TimeoutException.class, ConnectException.class)
+        .handled(true)
+        .process(exchange -> {
+          int statusCode = 503;
+          String title = "Service Unavailable";
+          exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, statusCode);
 
-        onException(java.util.concurrent.TimeoutException.class)
-                .handled(true)
-                .process(exchange -> {
-                    exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, 503);
-                    String uri = exchange.getProperty("originalUri", String.class);
-                    if (uri == null) {
-                        uri = exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
-                    }
-                    
-                    ProblemDetail problem = new ProblemDetail(
-                            URI.create("/problems/service-unavailable"),
-                            "Service Unavailable",
-                            503,
-                            "The downstream product service is temporarily unavailable.",
-                            uri != null ? URI.create(uri) : null
-                    );
-                    exchange.getMessage().setHeader(Exchange.CONTENT_TYPE, "application/problem+json");
-                    exchange.getMessage().setBody(problem);
-                });
+          String uriStr = (String) exchange.getProperty("originalUri");
+          if (uriStr == null) {
+            uriStr = exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
+          }
+          URI uri = (uriStr != null) ? URI.create(uriStr) : null;
 
-        from("direct:base-price-route")
-                .routeId("base-price-route")
-                .routeConfigurationId("global-error")
-                .process(exchange -> {
-                    String productIdStr = exchange.getIn().getHeader("productId", String.class);
-                    try {
-                        int productId = Integer.parseInt(productIdStr);
-                        if (productId <= 0) {
-                            throw new IllegalArgumentException("productId must be a positive integer");
-                        }
-                    } catch (NumberFormatException e) {
-                        throw new IllegalArgumentException("productId must be an integer");
-                    }
-                })
-                .setProperty("originalUri", header(Exchange.HTTP_URI))
-                .removeHeaders("CamelHttp*")
-                .removeHeader("Accept-Encoding")
-                .circuitBreaker().id("fakestore")
-                    .toD(appConfig.baseUrl() + "/products/${header.productId}"
-                            + "?connectionTimeout=5000&socketTimeout=5000")
-                    .unmarshal().json()
-                    .to("jsonata:mapping/base-price.jsonata")
-                .onFallback()
-                    .process(exchange -> {
-                        exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, 503);
-                        String productId = exchange.getIn().getHeader("productId", String.class);
-                        ProblemDetail problem = new ProblemDetail(
-                                URI.create("/problems/service-unavailable"),
-                                "Service Unavailable",
-                                503,
-                                "The downstream product service is temporarily unavailable.",
-                                productId != null ? URI.create("/v1/products/" + productId + "/base-price") : null
-                        );
-                        exchange.getMessage().setHeader(
-                                Exchange.CONTENT_TYPE, "application/problem+json");
-                        exchange.getMessage().setBody(problem);
-                    })
-                .end()
-                .removeHeader("Content-Encoding")
-                .removeHeader("Transfer-Encoding")
-                .removeHeader("Server");
-    }
+          ProblemDetail problem = new ProblemDetail(
+              URI.create("/problems/service-unavailable"),
+              title,
+              statusCode,
+              "Downstream service is temporarily unavailable",
+              uri
+          );
+
+          exchange.getMessage().setHeader(Exchange.CONTENT_TYPE, "application/problem+json");
+          exchange.getMessage().setBody(problem);
+        });
+
+    from("direct:base-price-route")
+        .routeId("base-price-route")
+        .routeConfigurationId("global-error")
+        .process(exchange -> {
+          Integer productId = exchange.getIn().getHeader("productId", Integer.class);
+          if (productId == null || productId <= 0) {
+            throw new IllegalArgumentException("Invalid product ID");
+          }
+        })
+        .setProperty("originalUri", header(Exchange.HTTP_URI))
+        .removeHeaders("CamelHttp*")
+        .removeHeader("Accept-Encoding")
+        .circuitBreaker().id("fakestore")
+        .toD(appConfig.fakestore().baseUrl() + "/products/${header.productId}"
+            + "?connectionTimeout=5000&socketTimeout=5000")
+        .unmarshal().json()
+        .to("jsonata:mapping/base-price.jsonata")
+        .end()
+        .removeHeader("Content-Encoding")
+        .removeHeader("Transfer-Encoding")
+        .removeHeader("Server");
+  }
 }

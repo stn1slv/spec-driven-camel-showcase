@@ -14,8 +14,8 @@
 
 **Purpose**: Project initialization and base configuration for downstream systems.
 
-- [ ] T001 Update `src/main/resources/application.yml` with downstream URIs for ExchangeRate API and Shippo API.
-- [ ] T002 [P] Create typed configuration properties `src/main/java/com/example/api/AppConfig.java` to include ExchangeRate and Shippo endpoints.
+- [x] T001 Update `src/main/resources/application.yml` with downstream URIs for ExchangeRate API and Shippo API.
+- [x] T002 [P] Create typed configuration properties `src/main/java/com/example/api/AppConfig.java` to include ExchangeRate and Shippo endpoints.
 
 ---
 
@@ -23,8 +23,8 @@
 
 **Purpose**: Core infrastructure that MUST be complete before ANY flow can be implemented.
 
-- [ ] T003 Update global error handling in `src/main/java/com/example/routes/GlobalErrorRoute.java` to handle timeouts, connectivity exceptions, and payload validation failures mapping to 503/504, 400/422, and map malformed/missing downstream responses to a 500 Internal Server Error with warning logs.
-- [ ] T004 Configure Circuit Breakers (Resilience4j) for the downstream API calls to satisfy the Design for Failure constitution principle.
+- [x] T003 Update global error handling in `src/main/java/com/example/routes/GlobalErrorRoute.java` to handle timeouts, connectivity exceptions, and payload validation failures mapping to 503/504, 400/422, and map malformed/missing downstream responses to a 500 Internal Server Error with warning logs.
+- [x] T004 Configure Circuit Breakers (Resilience4j) for the downstream API calls to satisfy the Design for Failure constitution principle.
 
 **Checkpoint**: Error handling mechanisms and circuit breakers are robust.
 
@@ -38,16 +38,16 @@
 
 ### Tests for Flow 1 ⚠️
 
-- [ ] T005 [P] [Flow1] Create Camel Route integration test using Advice Once pattern in `src/test/java/com/example/integration/LocalizedQuoteRouteTest.java` covering the happy path, Bad Requests (400/422), and Downstream Failures (5xx).
+- [x] T005 [P] [Flow1] Create Camel Route integration test using Advice Once pattern in `src/test/java/com/example/integration/LocalizedQuoteRouteTest.java` covering the happy path, Bad Requests (400/422), and Downstream Failures (5xx).
 
 ### Implementation for Flow 1
 
-- [ ] T006 [P] [Flow1] Create DTO records (`LocalizedOrderQuote`, `ExchangeRateResponse`, `ShippingQuoteResponse`) in `src/main/java/com/example/mapping/LocalizedQuoteRecords.java`.
-- [ ] T007 [Flow1] Define the REST endpoint in `src/main/java/com/example/api/LocalizedQuoteApi.java` mapped to `/v1/products/{productId}/localized-quote`.
-- [ ] T008 [Flow1] Create the Camel route `src/main/java/com/example/routes/LocalizedQuoteRoute.java` using the `multicast().parallelProcessing()` Scatter-Gather pattern and circuit breakers.
-- [ ] T009 [Flow1] Add payload aggregation logic to combine the responses from Base Price, Exchange Rate, and Shippo APIs, explicitly multiplying the base price by the exchange rate.
-- [ ] T010 [Flow1] Implement parameter validation (Currency format, missing params) inside the route and map to 400 Bad Request.
-- [ ] T011 [Flow1] Apply header sanitization (e.g. `Accept-Encoding`) before each downstream call and prior to the client response.
+- [x] T006 [P] [Flow1] Create DTO records (`LocalizedOrderQuote`, `ExchangeRateResponse`, `ShippingQuoteResponse`) in `src/main/java/com/example/mapping/LocalizedQuoteRecords.java`.
+- [x] T007 [Flow1] Define the REST endpoint in `src/main/java/com/example/api/LocalizedQuoteApi.java` mapped to `/v1/products/{productId}/localized-quote`.
+- [x] T008 [Flow1] Create the Camel route `src/main/java/com/example/routes/LocalizedQuoteRoute.java` using the `multicast().parallelProcessing()` Scatter-Gather pattern and circuit breakers.
+- [x] T009 [Flow1] Add payload aggregation logic to combine the responses from Base Price, Exchange Rate, and Shippo APIs, explicitly multiplying the base price by the exchange rate.
+- [x] T010 [Flow1] Implement parameter validation (Currency format, missing params) inside the route and map to 400 Bad Request.
+- [x] T011 [Flow1] Apply header sanitization (e.g. `Accept-Encoding`) before each downstream call and prior to the client response.
 
 **Checkpoint**: At this point, Flow 1 should be fully functional and testable independently.
 
@@ -57,8 +57,8 @@
 
 **Purpose**: Improvements that affect the application as a whole.
 
-- [ ] T012 [P] Ensure timeouts are explicitly set on HTTP component calls in the route.
-- [ ] T013 [P] Verify `LocalizeQuoteRouteTest` passes without recreating the Spring context (`@DirtiesContext` must not be used).
+- [x] T012 [P] Ensure timeouts are explicitly set on HTTP component calls in the route.
+- [x] T013 [P] Verify `LocalizeQuoteRouteTest` passes without recreating the Spring context (`@DirtiesContext` must not be used).
 
 ---
 
