@@ -49,7 +49,7 @@ description: "Task list for integration implementation"
 - [x] T007 [P] [Flow1] Define Source Product and Target Base Price Java records in `src/main/java/com/example/mapping/`
 - [x] T008 [P] [Flow1] Define ProblemDetail Java record for error representation in `src/main/java/com/example/mapping/ProblemDetail.java`
 - [x] T009 [Flow1] Define REST DSL endpoint `GET /v1/products/{productId}/base-price` with positive integer validation for `productId` (FR-002) in `src/main/java/com/example/api/BasePriceApi.java`
-- [x] T010 [Flow1] Implement data mapping processor from FakeStore to BasePrice in `src/main/java/com/example/mapping/BasePriceMapper.java`
+- [x] T010 [Flow1] Implement data mapping from FakeStore to BasePrice using JSONata-based mapping (no dedicated `BasePriceMapper` Java class)
 - [x] T011 [Flow1] Implement main Camel route orchestrating FakeStoreAPI call using Resilience4j circuit breaker in `src/main/java/com/example/routes/BasePriceRoute.java`
 - [x] T012 [Flow1] Add ingress and egress header sanitization (strip `Accept-Encoding`, `Content-Encoding`, `Server`) in `src/main/java/com/example/routes/BasePriceRoute.java`
 - [x] T013 [Flow1] Implement specific error handling (404, 504, 502 Bad Gateway) with explicit `.throwException()` and status assignments in `src/main/java/com/example/routes/BasePriceRoute.java`

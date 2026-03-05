@@ -13,7 +13,7 @@ E-commerce Platform sends a GET request for a product's base price to the Integr
 
 **Why this priority**: Core requirement for the integration interface I.001.
 
-**Independent Test**: Send a GET request to `/v1/products/1/base-price` and verify that the response contains `productId: 1`, a numeric `basePrice`, and `currency: "USD"`.
+**Independent Test**: Send a GET request to `/api/v1/products/1/base-price` and verify that the response contains `productId: 1`, a numeric `basePrice`, and `currency: "USD"`.
 
 **Acceptance Scenarios**:
 
@@ -24,9 +24,10 @@ E-commerce Platform sends a GET request for a product's base price to the Integr
 
 ### Edge Cases
 
-- **Receiver Timeout**: What happens when FakeStoreAPI times out? (The Integration Layer should return a 504 Gateway Timeout or similar error).
+- **Receiver Timeout**: What happens when FakeStoreAPI times out? (The Integration Layer should return a 504 Gateway Timeout).
 - **Invalid ID Format**: How does the system handle non-integer product IDs? (The Integration Layer should return a 400 Bad Request).
-- **Downstream Error**: How does the system handle 500 errors from FakeStoreAPI? (The Integration Layer should propagate the error or return a 502 Bad Gateway).
+- **Downstream Error**: How does the system handle 500 errors from FakeStoreAPI? (The Integration Layer should return a 502 Bad Gateway).
+- **Circuit Breaker Open**: How does the system handle repeated downstream failures? (The Integration Layer should return a 503 Service Unavailable).
 
 ## Clarifications
 

@@ -14,7 +14,7 @@ Represented as a JSON response from `GET https://fakestoreapi.com/products/{id}`
 | `rating` | Object | `{...}` | Customer ratings |
 
 ## Target Base Price Response (Internal)
-Exposed via `GET /v1/products/{productId}/base-price`.
+Exposed via `GET /api/v1/products/{productId}/base-price`.
 
 | Field | Type | Example | Mapping Source | Validation |
 | --- | --- | --- | --- | --- |
@@ -36,4 +36,4 @@ Exposed via `GET /v1/products/{productId}/base-price`.
 | `title` | String | `"Not Found"` | Short error title |
 | `status` | Integer | `404` | HTTP status code |
 | `detail` | String | `"Product not found"` | Detailed error message |
-| `instance` | String (URI) | `"/v1/products/99/base-price"` | Request path |
+| `instance` | String (URI) | `"/api/v1/products/99/base-price"` | Request path |

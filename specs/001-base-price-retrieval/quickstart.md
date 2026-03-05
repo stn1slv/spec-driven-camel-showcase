@@ -9,7 +9,7 @@ The server starts on port `8080` (default Spring Boot port).
 ## Test the API
 Retrieve base price for product ID 1:
 ```bash
-curl -X GET "http://localhost:8080/v1/products/1/base-price"
+curl -X GET "http://localhost:8080/api/v1/products/1/base-price"
 ```
 Response:
 ```json

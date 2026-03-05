@@ -67,7 +67,7 @@ public class BasePriceRouteTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(1, response.getBody().productId());
-        assertEquals(109.95, response.getBody().basePrice());
+        assertEquals(109.95, response.getBody().basePrice(), 0.0001);
         assertEquals("USD", response.getBody().currency());
 
         mockFakeStore.assertIsSatisfied();
@@ -86,6 +86,35 @@ public class BasePriceRouteTest {
         assertNotNull(response.getBody());
         assertEquals(404, response.getBody().status());
         
+        mockFakeStore.assertIsSatisfied();
+    }
+
+    @Test
+    public void testInvalidProductIdValidation() throws Exception {
+        mockFakeStore.expectedMessageCount(0);
+
+        ResponseEntity<ProblemDetail> response = restTemplate.getForEntity("/api/v1/products/0/base-price", ProblemDetail.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(400, response.getBody().status());
+
+        mockFakeStore.assertIsSatisfied();
+    }
+
+    @Test
+    public void testCircuitBreakerFallbackServiceUnavailable() throws Exception {
+        mockFakeStore.expectedMinimumMessageCount(1);
+        mockFakeStore.whenAnyExchangeReceived(e -> {
+            throw new java.util.concurrent.TimeoutException("Simulated timeout failure");
+        });
+
+        ResponseEntity<ProblemDetail> response = restTemplate.getForEntity("/api/v1/products/1/base-price", ProblemDetail.class);
+
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(503, response.getBody().status());
+
         mockFakeStore.assertIsSatisfied();
     }
 }

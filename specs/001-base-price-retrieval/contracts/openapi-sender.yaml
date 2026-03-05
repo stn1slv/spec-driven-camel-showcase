@@ -3,6 +3,8 @@ info:
   title: Base Price Retrieval API
   version: 1.0.0
   description: Exposed by the Integration Layer to retrieve product base prices.
+servers:
+  - url: /api
 paths:
   /v1/products/{productId}/base-price:
     get:
@@ -47,6 +49,18 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
         '502':
           description: Bad gateway (downstream system error)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '503':
+          description: Service unavailable (circuit breaker open)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '504':
+          description: Gateway timeout (downstream system timeout)
           content:
             application/problem+json:
               schema:
