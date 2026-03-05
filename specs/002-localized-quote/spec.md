@@ -5,6 +5,15 @@
 **Status**: Draft  
 **Input**: User description: "Implementation of the integration interface defined @docs/i.002.md"
 
+## Clarifications
+
+### Session 2026-03-05
+- Q: What happens when a downstream logistics or currency system times out or is unavailable? → A: Fail the entire request and return an appropriate 5xx error (e.g., 504 or 503).
+- Q: How does the system handle an unsupported target currency provided by the E-commerce platform? → A: Return a 400 Bad Request or 422 Unprocessable Entity indicating the currency is not supported.
+- Q: What happens if the shipping system cannot calculate a rate for the specified destination zip code? → A: Return a 400 Bad Request or 422 Unprocessable Entity indicating the shipping route is invalid.
+- Q: Should the three downstream APIs be called sequentially or in parallel? → A: Parallel / Scatter-Gather.
+- Q: How should the system handle successful but malformed responses (missing required fields) from downstream APIs? → A: Log warning, reject request.
+
 ## Integration Scenarios & Testing *(mandatory)*
 
 ### Flow 1 - Generate Localized Order Quote (Priority: P1)
@@ -25,9 +34,10 @@ The E-commerce Platform requests a full localized quote for a product, specifyin
 
 ### Edge Cases
 
-- What happens when a downstream logistics or currency system times out or is unavailable?
-- How does the system handle an unsupported target currency provided by the E-commerce platform?
-- What happens if the shipping system cannot calculate a rate for the specified destination zip code?
+- **Downstream Unavailability:** If any downstream logistics or currency system times out or is unavailable, the entire request fails immediately, returning an appropriate 5xx error (e.g., 504 Gateway Timeout or 503 Service Unavailable) to prevent incomplete quotes.
+- **Unsupported Target Currency:** If the provided target currency is unsupported by the exchange rate system, return a 400 Bad Request or 422 Unprocessable Entity error to the client.
+- **Unserviceable Destination Zip:** If the shipping system cannot calculate a rate for the specified destination zip code, return a 400 Bad Request or 422 Unprocessable Entity indicating the shipping route is invalid.
+- **Malformed Downstream Response:** If a downstream API returns a successful HTTP code but the payload is malformed or missing required fields, log a warning and reject the request with a 500 Internal Server Error.
 
 ## Requirements *(mandatory)*
 
@@ -35,7 +45,7 @@ The E-commerce Platform requests a full localized quote for a product, specifyin
 
 - **FR-001**: System MUST accept a synchronous quote request containing a product identifier, a target currency code, and a destination zip code.
 - **FR-002**: System MUST validate incoming parameters, ensuring currency codes adhere to standard formatting and all required fields are present.
-- **FR-003**: System MUST orchestrate requests to the Base Price service, ExchangeRate service, and Shipping service.
+- **FR-003**: System MUST orchestrate requests to the Base Price service, ExchangeRate service, and Shipping service in parallel (Scatter-Gather pattern) to minimize overall latency.
 - **FR-004**: System MUST calculate the localized product price by multiplying the retrieved base price by the latest exchange rate.
 - **FR-005**: System MUST aggregate the calculated price, target currency, shipping cost, and estimated delivery days into a single cohesive response.
 - **FR-006**: System MUST handle downstream service errors (e.g., timeouts, unsupported inputs) gracefully by translating them into standardized error responses without retrying failed connectivity calls.
