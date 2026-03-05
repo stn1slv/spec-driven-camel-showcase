@@ -65,7 +65,7 @@ public class LoadTest {
         long start = System.currentTimeMillis();
         
         for (int i = 0; i < 10; i++) {
-            ResponseEntity<BasePrice> response = restTemplate.getForEntity("/v1/products/1/base-price", BasePrice.class);
+            ResponseEntity<BasePrice> response = restTemplate.getForEntity("/api/v1/products/1/base-price", BasePrice.class);
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
         

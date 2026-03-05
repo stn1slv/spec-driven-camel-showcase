@@ -62,7 +62,7 @@ public class BasePriceRouteTest {
             e.getMessage().setHeader(org.apache.camel.Exchange.HTTP_RESPONSE_CODE, 200);
         });
 
-        ResponseEntity<BasePrice> response = restTemplate.getForEntity("/v1/products/1/base-price", BasePrice.class);
+        ResponseEntity<BasePrice> response = restTemplate.getForEntity("/api/v1/products/1/base-price", BasePrice.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -80,7 +80,7 @@ public class BasePriceRouteTest {
             throw new org.apache.camel.http.base.HttpOperationFailedException("http://mock-fakestore.com/products/99", 404, "Not Found", null, null, "");
         });
 
-        ResponseEntity<ProblemDetail> response = restTemplate.getForEntity("/v1/products/99/base-price", ProblemDetail.class);
+        ResponseEntity<ProblemDetail> response = restTemplate.getForEntity("/api/v1/products/99/base-price", ProblemDetail.class);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());

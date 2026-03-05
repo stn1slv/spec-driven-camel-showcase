@@ -12,7 +12,7 @@ public class GlobalErrorRoute extends RouteConfigurationBuilder {
 
     @Override
     public void configuration() throws Exception {
-        routeConfiguration("global-error")
+        routeConfiguration()
             .onException(Exception.class)
             .handled(true)
             .process(exchange -> {
@@ -32,6 +32,7 @@ public class GlobalErrorRoute extends RouteConfigurationBuilder {
                         uri != null ? URI.create(uri) : null
                 );
                 
+                exchange.getMessage().setHeader(Exchange.CONTENT_TYPE, "application/problem+json");
                 exchange.getMessage().setBody(problem);
             });
     }

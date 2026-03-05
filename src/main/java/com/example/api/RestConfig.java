@@ -11,6 +11,7 @@ public class RestConfig extends RouteBuilder {
     public void configure() throws Exception {
         restConfiguration()
             .component("servlet")
+            .contextPath("/api")
             .bindingMode(RestBindingMode.json)
             .clientRequestValidation(true);
     }

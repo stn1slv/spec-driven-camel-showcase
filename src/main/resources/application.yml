@@ -4,7 +4,7 @@ server:
 camel:
   servlet:
     mapping:
-      context-path: /*
+      context-path: /api/*
   springboot:
     name: base-price-retrieval
     main-run-controller: true

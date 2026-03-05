@@ -37,6 +37,9 @@ public class BasePriceRoute extends RouteBuilder {
                 }
                 
                 String uri = exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
+                if (uri == null) {
+                    uri = exchange.getProperty("originalUri", String.class);
+                }
                 
                 ProblemDetail problem = new ProblemDetail(
                         URI.create("/problems/downstream-error"),
@@ -46,6 +49,7 @@ public class BasePriceRoute extends RouteBuilder {
                         uri != null ? URI.create(uri) : null
                 );
                 
+                exchange.getMessage().setHeader(Exchange.CONTENT_TYPE, "application/problem+json");
                 exchange.getMessage().setBody(problem);
             });
 
@@ -54,6 +58,9 @@ public class BasePriceRoute extends RouteBuilder {
             .process(exchange -> {
                 exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, 400);
                 String uri = exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
+                if (uri == null) {
+                    uri = exchange.getProperty("originalUri", String.class);
+                }
                 
                 ProblemDetail problem = new ProblemDetail(
                         URI.create("/problems/bad-request"),
@@ -62,6 +69,7 @@ public class BasePriceRoute extends RouteBuilder {
                         exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class).getMessage(),
                         uri != null ? URI.create(uri) : null
                 );
+                exchange.getMessage().setHeader(Exchange.CONTENT_TYPE, "application/problem+json");
                 exchange.getMessage().setBody(problem);
             });
 
@@ -78,6 +86,7 @@ public class BasePriceRoute extends RouteBuilder {
                     throw new IllegalArgumentException("productId must be an integer");
                 }
             })
+            .setProperty("originalUri", header(Exchange.HTTP_URI))
             .removeHeaders("CamelHttp*")
             .removeHeader("Accept-Encoding")
             .circuitBreaker().id("fakestore")
@@ -95,7 +104,8 @@ public class BasePriceRoute extends RouteBuilder {
                             "The downstream product service is temporarily unavailable. Please try again later.",
                             productId != null ? URI.create("/v1/products/" + productId + "/base-price") : null
                     );
-                    exchange.getMessage().setBody(problem);
+                    exchange.getMessage().setHeader(Exchange.CONTENT_TYPE, "application/problem+json");
+                exchange.getMessage().setBody(problem);
                 })
             .end()
             .removeHeader("Content-Encoding")
