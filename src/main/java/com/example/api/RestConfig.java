@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class RestConfig extends RouteBuilder {
 
-    @Override
-    public void configure() throws Exception {
-        restConfiguration()
-                .component("servlet")
-                .contextPath("/api")
-                .bindingMode(RestBindingMode.json)
-                .clientRequestValidation(false);
-    }
+  @Override
+  public void configure() throws Exception {
+    restConfiguration()
+        .component("servlet")
+        .contextPath("/api")
+        .bindingMode(RestBindingMode.json)
+        .clientRequestValidation(false);
+  }
 }

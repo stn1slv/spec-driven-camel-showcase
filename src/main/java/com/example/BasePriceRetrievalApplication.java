@@ -5,17 +5,18 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 /**
- * Main entry point for the Base Price Retrieval application.
+ * Main application class.
  */
 @SpringBootApplication
 @ConfigurationPropertiesScan
 public class BasePriceRetrievalApplication {
 
-    /**
-     * Application main method.
-     * @param args Command line arguments
-     */
-    public static void main(String[] args) {
-        SpringApplication.run(BasePriceRetrievalApplication.class, args);
-    }
+  /**
+   * Main entry point.
+   *
+   * @param args Command line arguments.
+   */
+  public static void main(String[] args) {
+    SpringApplication.run(BasePriceRetrievalApplication.class, args);
+  }
 }

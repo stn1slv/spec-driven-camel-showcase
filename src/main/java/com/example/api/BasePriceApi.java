@@ -10,17 +10,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class BasePriceApi extends RouteBuilder {
 
-    @Override
-    public void configure() throws Exception {
-        rest("/v1/products")
-                .get("/{productId}/base-price")
-                .description("Retrieve the base price of a product in USD")
-                .param()
-                    .name("productId")
-                    .type(RestParamType.path)
-                    .dataType("integer")
-                    .required(true)
-                .endParam()
-                .to("direct:base-price-route");
-    }
+  @Override
+  public void configure() throws Exception {
+    rest("/v1/products")
+        .get("/{productId}/base-price")
+        .description("Retrieve the base price of a product in USD")
+        .param()
+        .name("productId")
+        .type(RestParamType.path)
+        .dataType("integer")
+        .required(true)
+        .endParam()
+        .to("direct:base-price-route");
+  }
 }
