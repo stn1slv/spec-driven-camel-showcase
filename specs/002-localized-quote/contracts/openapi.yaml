@@ -1,0 +1,64 @@
+openapi: 3.0.0
+info:
+  title: Localized Quote Service
+  version: 1.0.0
+  description: "Generate a complete quote including currency conversion and shipping"
+paths:
+  /v1/products/{productId}/localized-quote:
+    get:
+      summary: Get a complete quote including currency conversion and shipping
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: targetCurrency
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Z]{3}$'
+            example: "EUR"
+        - name: destinationZip
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "21000"
+      responses:
+        '200':
+          description: Localized quote generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  productId:
+                    type: integer
+                    example: 1
+                  convertedPrice:
+                    type: number
+                    format: float
+                    example: 104.45
+                  currency:
+                    type: string
+                    example: "EUR"
+                  shippingCost:
+                    type: number
+                    format: float
+                    example: 15.00
+                  estimatedDays:
+                    type: integer
+                    example: 3
+        '400':
+          description: Bad Request (Invalid parameters, unsupported currency, unserviceable zip)
+        '422':
+          description: Unprocessable Entity (Unsupported currency, unserviceable zip)
+        '500':
+          description: Internal Server Error (Malformed downstream response)
+        '503':
+          description: Service Unavailable (Downstream unavailability)
+        '504':
+          description: Gateway Timeout (Downstream timeout)
