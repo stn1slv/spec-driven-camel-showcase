@@ -3,8 +3,6 @@ package com.example.mapping;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -41,36 +39,26 @@ public final class LocalizedQuoteRecords {
    * Response from Exchange Rate API.
    */
   @JsonIgnoreProperties(ignoreUnknown = true)
-  public static final class ExchangeRateResponse {
-    private final String base;
-    private final Map<String, Float> rates;
-
+  public record ExchangeRateResponse(
+      String base,
+      Map<String, Float> rates
+  ) {
     /**
-     * Constructor for ExchangeRateResponse.
-     *
-     * @param base Base currency.
-     * @param rates Map of exchange rates.
+     * Constructor with defensive copy.
      */
     @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Defensive copy used")
-    public ExchangeRateResponse(
-        @JsonProperty("base") String base,
-        @JsonProperty("rates") Map<String, Float> rates) {
+    public ExchangeRateResponse(String base, Map<String, Float> rates) {
       this.base = base;
-      this.rates = rates != null ? Collections.unmodifiableMap(new HashMap<>(rates)) : null;
-    }
-
-    public String base() {
-      return base;
+      this.rates = rates != null ? Map.copyOf(rates) : null;
     }
 
     /**
-     * Returns an unmodifiable view of the rates map.
-     *
-     * @return Map of exchange rates.
+     * Accessor with defensive copy.
      */
-    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Unmodifiable view returned")
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Defensive copy used")
+    @Override
     public Map<String, Float> rates() {
-      return rates;
+      return rates != null ? Map.copyOf(rates) : null;
     }
   }
 

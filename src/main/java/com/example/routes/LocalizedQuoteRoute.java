@@ -5,6 +5,8 @@ import com.example.mapping.LocalizedQuoteRecords.BasePriceResponse;
 import com.example.mapping.LocalizedQuoteRecords.ExchangeRateResponse;
 import com.example.mapping.LocalizedQuoteRecords.LocalizedOrderQuote;
 import com.example.mapping.LocalizedQuoteRecords.ShippingQuoteResponse;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.camel.AggregationStrategy;
@@ -14,12 +16,13 @@ import org.apache.camel.http.base.HttpOperationFailedException;
 import org.springframework.stereotype.Component;
 
 /**
- * Route for generating localized product quotes.
+ * Route for generating localized product quotes using JSONata for transformation.
  */
 @Component
 public class LocalizedQuoteRoute extends RouteBuilder {
 
   private final AppConfig appConfig;
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   public LocalizedQuoteRoute(AppConfig appConfig) {
     this.appConfig = appConfig;
@@ -57,37 +60,23 @@ public class LocalizedQuoteRoute extends RouteBuilder {
         .process(exchange -> {
           @SuppressWarnings("unchecked")
           Map<String, Object> results = exchange.getIn().getBody(Map.class);
-
-          BasePriceResponse basePrice = (BasePriceResponse) results.get("basePrice");
           ExchangeRateResponse exchangeRate = (ExchangeRateResponse) results.get("exchangeRate");
-          ShippingQuoteResponse shipping = (ShippingQuoteResponse) results.get("shipping");
-          String targetCurrency = exchange.getIn().getHeader("targetCurrency", String.class);
+          String targetCurrency = (String) results.get("targetCurrency");
 
-          if (basePrice == null || exchangeRate == null || shipping == null) {
-            throw new IllegalStateException("Missing one or more downstream responses");
-          }
-
-          Map<String, Float> rates = exchangeRate.rates();
-          Float rate = rates != null ? rates.get(targetCurrency) : null;
-          if (rate == null) {
+          if (exchangeRate == null || exchangeRate.rates() == null
+              || !exchangeRate.rates().containsKey(targetCurrency)) {
             throw new HttpOperationFailedException("http://exchangerate", 422,
                 "Unsupported currency", null, null, "");
           }
 
-          float convertedVal = basePrice.basePrice() * rate;
-          Float convertedPrice = Math.round(convertedVal * 100.0f) / 100.0f;
-          float shipVal = Float.parseFloat(shipping.amount());
-          Float shipCost = Math.round(shipVal * 100.0f) / 100.0f;
-
-          LocalizedOrderQuote quote = new LocalizedOrderQuote(
-              basePrice.productId(),
-              convertedPrice,
-              targetCurrency,
-              shipCost,
-              shipping.estimatedDays()
-          );
-          exchange.getIn().setBody(quote);
+          // Convert the Map of POJOs to a pure Map tree for JSONata
+          Map<String, Object> jsonTree = objectMapper.convertValue(results,
+              new TypeReference<Map<String, Object>>() {});
+          exchange.getIn().setBody(jsonTree);
         })
+        .to("jsonata:mapping/localized-quote.jsonata")
+        .unmarshal().json(org.apache.camel.model.dataformat.JsonLibrary.Jackson,
+            LocalizedOrderQuote.class)
         .removeHeaders("*", "CamelHttpResponseCode");
 
     from("direct:call-base-price")
@@ -98,6 +87,7 @@ public class LocalizedQuoteRoute extends RouteBuilder {
           .toD(appConfig.baseprice().baseUrl()
               + "/v1/products/${header.productId}/base-price"
               + "?connectionTimeout=5000&socketTimeout=5000")
+          .convertBodyTo(String.class)
           .unmarshal().json(org.apache.camel.model.dataformat.JsonLibrary.Jackson,
               BasePriceResponse.class)
         .end();
@@ -109,6 +99,7 @@ public class LocalizedQuoteRoute extends RouteBuilder {
         .circuitBreaker().id("exchangerate").inheritErrorHandler(true)
           .toD(appConfig.exchangerate().baseUrl()
               + "/v4/latest/USD?connectionTimeout=5000&socketTimeout=5000")
+          .convertBodyTo(String.class)
           .unmarshal().json(org.apache.camel.model.dataformat.JsonLibrary.Jackson,
               ExchangeRateResponse.class)
         .end();
@@ -125,6 +116,7 @@ public class LocalizedQuoteRoute extends RouteBuilder {
         .circuitBreaker().id("shippo").inheritErrorHandler(true)
           .toD(appConfig.shippo().baseUrl()
               + "/shipments/?connectionTimeout=5000&socketTimeout=5000")
+          .convertBodyTo(String.class)
           .unmarshal().json(org.apache.camel.model.dataformat.JsonLibrary.Jackson,
               ShippingQuoteResponse.class)
         .end();
@@ -138,6 +130,7 @@ public class LocalizedQuoteRoute extends RouteBuilder {
 
       if (oldExchange == null) {
         results = new HashMap<>();
+        results.put("targetCurrency", newExchange.getIn().getHeader("targetCurrency"));
         oldExchange = newExchange;
       } else {
         @SuppressWarnings("unchecked")

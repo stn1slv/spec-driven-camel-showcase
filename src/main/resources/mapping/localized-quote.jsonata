@@ -1,0 +1,7 @@
+{
+  "productId": basePrice.productId,
+  "convertedPrice": $round(basePrice.basePrice * $lookup(exchangeRate.rates, targetCurrency), 2),
+  "currency": targetCurrency,
+  "shippingCost": $round($number(shipping.amount), 2),
+  "estimatedDays": shipping.estimated_days
+}
