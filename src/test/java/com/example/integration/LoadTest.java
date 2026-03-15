@@ -1,36 +1,17 @@
 package com.example.integration;
 
 import com.example.mapping.BasePrice;
-import org.apache.camel.CamelContext;
 import org.apache.camel.EndpointInject;
-import org.apache.camel.builder.AdviceWith;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
-import org.apache.camel.test.spring.junit5.UseAdviceWith;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@CamelSpringBootTest
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
-    "app.fakestore.base-url=http://mock-fakestore.com"
-})
-@UseAdviceWith
-public class LoadTest {
-
-    @Autowired
-    private CamelContext camelContext;
-
-    @Autowired
-    private TestRestTemplate restTemplate;
+public class LoadTest extends BaseIntegrationTest {
 
     @EndpointInject("mock:fakestore")
     private MockEndpoint mockFakeStore;
@@ -38,15 +19,6 @@ public class LoadTest {
     @BeforeEach
     public void setup() throws Exception {
         mockFakeStore.reset();
-        
-        if (!camelContext.getStatus().isStarted()) {
-            AdviceWith.adviceWith(camelContext, "base-price-route", a -> {
-                a.interceptSendToEndpoint("http://mock-fakestore.com*")
-                    .skipSendToOriginalEndpoint()
-                    .to("mock:fakestore");
-            });
-            camelContext.start();
-        }
     }
 
     @AfterEach
