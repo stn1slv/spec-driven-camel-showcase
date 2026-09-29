@@ -34,7 +34,7 @@ You can checkout specific tags to see the exact state of the project at various 
 These tags represent the foundational state of the entire repository before specific integration cases are implemented.
 
 * **[`00-initial`](https://github.com/stn1slv/spec-driven-camel-showcase/tree/00-initial)**: The starting point. Contains only the repository structure, Spec-Kit templates, and scripts.
-* **[`01-constitution`](https://github.com/stn1slv/spec-driven-camel-showcase/tree/01-constitution)**: The baseline architecture. Contains the core Spring Boot/Camel skeleton and global guidelines (e.g., [`GEMINI.md`](./GEMINI.md)) generated during the constitution phase.
+* **[`01-constitution`](https://github.com/stn1slv/spec-driven-camel-showcase/tree/01-constitution)**: The baseline architecture. Contains the core Spring Boot/Camel skeleton and global guidelines (e.g., [`CLAUDE.md`](./CLAUDE.md)) generated during the constitution phase.
 
 #### Case-Specific Progress Tags
 As integration cases are developed (e.g., [`i.001`](./docs/i.001.md), `i.002`), their progress is tracked using namespaced tags mapping to the SDD phases.
